@@ -16,5 +16,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run tests
-      run: ./test.sh
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Start services (CPU)
+      run: make up-cpu
+
+    - name: Wait for Ollama to be ready
+      run: |
+        ./wait-for-it.sh localhost:11434 --timeout=120
+
+    - name: Pull Ollama model (llama2)
+      run: docker exec manzolo-ollapdf-ollama ollama pull llama2
+
+    - name: Wait for Streamlit app to be ready
+      run: |
+        ./wait-for-it.sh localhost:8501 --timeout=60
+        echo "Giving Streamlit app more time to initialize..."
+        sleep 30
+
+    - name: Run RAG system test
+      run: python test_rag.py
+
+    - name: Stop services
+      if: always()
+      run: make down
