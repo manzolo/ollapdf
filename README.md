@@ -16,12 +16,14 @@ Have you ever needed to find specific information buried deep within dozens of P
 *   **Easy to Use:** Simply place your PDFs in a directory and start the application.
 *   **Dockerized:** Runs in a container for easy setup and consistent performance.
 
-## Screenshot
+## Screenshots
 
-<img width="1880" height="977" alt="immagine" src="https://github.com/user-attachments/assets/5132217f-e056-42f5-82f1-66fb3d2e1d4d" />
-<img width="1880" height="977" alt="immagine" src="https://github.com/user-attachments/assets/ad20b49f-d340-4adf-b162-e943731f8991" />
-<img width="1880" height="977" alt="immagine" src="https://github.com/user-attachments/assets/b7742936-dc65-4235-8dd7-ad4569b9e62c" />
-<img width="1880" height="977" alt="immagine" src="https://github.com/user-attachments/assets/c8a055d4-3cb0-4a44-b50d-b18e4640a72d" />
+Here are some screenshots of the OllaPDF application interface:
+
+<img width="1880" height="977" alt="OllaPDF Application Screenshot 1" src="https://github.com/user-attachments/assets/5132217f-e056-42f5-82f1-66fb3d2e1d4d" />
+<img width="1880" height="977" alt="OllaPDF Application Screenshot 2" src="https://github.com/user-attachments/assets/ad20b49f-d340-4adf-b162-e943731f8991" />
+<img width="1880" height="977" alt="OllaPDF Application Screenshot 3" src="https://github.com/user-attachments/assets/b7742936-dc65-4235-8dd7-ad4569b9e62c" />
+<img width="1880" height="977" alt="OllaPDF Application Screenshot 4" src="https://github.com/user-attachments/assets/c8a055d4-3cb0-4a44-b50d-b18e4640a72d" />
 
 
 ## How It Works
