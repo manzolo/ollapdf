@@ -13,6 +13,15 @@ docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d --build
 # Wait for the Streamlit app to be ready
 echo "Waiting for Streamlit app..."
 ./wait-for-it.sh localhost:8501 --timeout=60
+echo "Giving Streamlit app more time to initialize..."
+sleep 30
+
+# Debugging: Print logs if health check fails
+set +e
+echo "--- OllaPDF Container Logs (before health check) ---"
+docker logs manzolo-ollapdf-rag
+echo "--- End OllaPDF Container Logs ---"
+set -e
 
 # Perform a health check
 echo "Performing health check..."
