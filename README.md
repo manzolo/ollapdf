@@ -108,6 +108,8 @@ If you have an NVIDIA GPU, you can run both OllaPDF and Ollama with GPU support 
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
 ```
 
+**Note:** If you need to install the NVIDIA Container Toolkit for GPU support, you can find a detailed guide on [Manzolo's website](https://www.manzolo.it/2025/11/installing-nvidia-container-toolkit/).
+
 ### 4. Pull an Ollama Model
 
 After starting the services (using Option 2 or 3), you need to pull a language model for Ollama to use. You can do this by executing a command inside the running Ollama container.
@@ -130,6 +132,28 @@ After starting the services (using Option 2 or 3), you need to pull a language m
 ### 5. Access OllaPDF
 
 Open your web browser and navigate to `http://localhost:8501`.
+
+## Viewing Container Logs
+
+To view the logs of a running container, you can use the `docker logs` command followed by the container's name.
+
+For the OllaPDF application container:
+
+```bash
+docker logs manzolo-ollapdf-rag
+```
+
+For the Ollama container (if running via `docker-compose.cpu.yml` or `docker-compose.gpu.yml`):
+
+```bash
+docker logs manzolo-ollapdf-ollama
+```
+
+You can also add the `-f` flag to follow the logs in real-time:
+
+```bash
+docker logs -f manzolo-ollapdf-rag
+```
 
 ## Contributing
 
