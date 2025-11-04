@@ -6,10 +6,9 @@ from queue import Queue, Empty
 from threading import Thread, Lock
 import time
 import requests
-# Assumendo che 'utils.py' esista e contenga le funzioni necessarie
 from utils import load_documents, create_vector_store, setup_rag_chain
 
-# === CONFIG ===
+# === Configuration ===
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
 DATA_DIR = "data"
 
@@ -20,7 +19,7 @@ st.set_page_config(
 )
 
 # =================================================================
-# === CSS/STYLING ===
+# === Css/Styling ===
 # =================================================================
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +153,7 @@ st.markdown("""
 </script>
 """, unsafe_allow_html=True)
 
-# === OLLAMA MODELS (INVARIATO) ===
+# === Ollama Models ===
 @st.cache_data(ttl=3600)
 def get_ollama_models(host):
     try:
@@ -170,7 +169,7 @@ def get_ollama_models(host):
     except Exception:
         return []
 
-# === LOAD DOCUMENTS (INVARIATO) ===
+# === Load Documents ===
 if 'documents' not in st.session_state:
     try:
         st.session_state.documents = load_documents(DATA_DIR)
@@ -181,7 +180,7 @@ if 'documents' not in st.session_state:
         st.session_state.documents = []
 
 
-# === REQUEST QUEUE (INVARIATO) ===
+# === Request Queue ===
 class RequestQueue:
     def __init__(self, max_concurrent=1):
         self.queue = Queue()
@@ -264,7 +263,7 @@ class RequestQueue:
 if "request_queue" not in st.session_state:
     st.session_state.request_queue = RequestQueue(max_concurrent=1)
 
-# === UTILITY FUNCTIONS (INVARIATO) ===
+# === Utility Functions ===
 
 def process_latex(text):
     """Converte i marcatori LaTeX standard (\\[...\\] e \\(...\\)) in KaTeX ( $$...$$ e $...$)."""
@@ -288,7 +287,7 @@ def clean_response(text):
 def render_math_content(content):
     return content 
 
-# === RAG INIT (INVARIATO) ===
+# === Rag Initialization ===
 @st.cache_resource(show_spinner=False)
 def initialize_rag(model_name):
     if not model_name:
@@ -309,7 +308,7 @@ if "selected_model_name" in st.session_state and st.session_state.selected_model
 else:
     st.session_state.rag_chain = None
 
-# === UI AND CHAT LOGIC (INVARIATO) ===
+# === Ui And Chat Logic ===
 
 st.title("📚 Intelligent Document Search")
 st.caption("Ask questions about your PDF documents and get precise answers")
@@ -391,8 +390,8 @@ for message in st.session_state.messages:
             if message.get("is_error"):
                 st.markdown(message["content"], unsafe_allow_html=True)
             else:
-                # *** SOLUZIONE FINALE PER IL DIV: Concatena l'HTML in una stringa unica ***
-                # message["content"] contiene il testo formattato in Markdown e KaTeX
+                # *** FINAL SOLUTION FOR THE DIV: Concatenate HTML into a single string ***
+                # message["content"] contains text formatted in Markdown and KaTeX
                 full_content = f'<div class="assistant-message">{message["content"]}</div>'
                 st.markdown(full_content, unsafe_allow_html=True)
                 
@@ -408,7 +407,7 @@ for request_id in list(st.session_state.pending_requests.keys()):
     request_data = st.session_state.request_queue.get_request_status(request_id)
     
     if request_data and request_data['status'] == 'completed':
-        # -> clean_response gestisce LaTeX e pulizia
+        # -> clean_response handles LaTeX and cleaning
         clean_answer, think_content = extract_think_content(request_data['response']["answer"])
         final_answer = clean_response(clean_answer)
         
@@ -425,7 +424,7 @@ for request_id in list(st.session_state.pending_requests.keys()):
         del st.session_state.pending_requests[request_id]
         st.rerun()
 
-# --- GESTIONE INPUT E POLLING (INVARIATO) ---
+# --- Input And Polling Management ---
 
 if prompt := st.chat_input("Type your question here..."):
     if st.session_state.rag_chain is None:
@@ -441,7 +440,7 @@ if prompt := st.chat_input("Type your question here..."):
         
         st.rerun()
 
-# Blocco di Polling
+# Polling Block
 pending_rids = list(st.session_state.pending_requests.keys())
 if pending_rids:
     rid = pending_rids[0]
