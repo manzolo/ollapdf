@@ -1,0 +1,16 @@
+services:
+  ollapdf:
+    build: .
+    container_name: manzolo-ollapdf-rag
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST}
+      - OLLAMA_MODEL_NAME=${OLLAMA_MODEL_NAME}
+    networks:
+      - ollapdf-net
+
+networks:
+  ollapdf-net:

@@ -1,0 +1,5 @@
+data/*
+!data/.gitkeep
+ollama_data/*
+!ollama_data/.gitkeep
+.env
