@@ -19,7 +19,7 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def load_documents(data_dir: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> List[Document]:
+def load_documents(data_dir: str, chunk_size: int, chunk_overlap: int) -> List[Document]:
     """Loads and processes all PDFs from the specified folder"""
     if not os.path.exists(data_dir):
         logger.error(f"Directory {data_dir} not found!")
@@ -62,20 +62,21 @@ def load_documents(data_dir: str, chunk_size: int = 1000, chunk_overlap: int = 2
             logger.error(f"❌ Error loading {filename}: {str(e)}")
             continue
     
-    if not documents:
-        logger.error("No documents loaded successfully!")
-        return []
+        if not documents:
+            logger.error("No documents loaded successfully!")
+            return []
     
-    logger.info(f"Total documents loaded: {len(documents)} from {len(pdf_files)} PDFs")
+        logger.info(f"Total documents loaded: {len(documents)} from {len(pdf_files)} PDFs")
+        logger.info(f"  - Chunk Size: {chunk_size}")
+        logger.info(f"  - Chunk Overlap: {chunk_overlap}")
     
-    # Split documents into chunks
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        length_function=len,
-        separators=["\n\n", "\n", " ", ""]
-    )
-    
+        # Split documents into chunks
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            length_function=len,
+            separators=["\n\n", "\n", " ", ""]
+        )    
     split_documents = text_splitter.split_documents(documents)
     
     logger.info(f"Documents split into {len(split_documents)} chunks")
@@ -118,11 +119,11 @@ def create_vector_store(documents: List[Document], model_name: str = "sentence-t
 
 def setup_rag_chain(
     retriever, 
+    temperature: float,
+    top_k: int,
     ollama_host: str = "http://ollama:11434", 
     model_name: str = "deepseek-r1:32b",
-    temperature: float = 0.1,
-    timeout: int = 300,
-    top_k: int = 4
+    timeout: int = 300
 ):
     """Configures the RAG chain with the Ollama model (LANGCHAIN v1 COMPATIBLE)"""
     logger.info(f"Configuring RAG chain:")

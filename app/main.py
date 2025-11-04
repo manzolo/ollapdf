@@ -12,6 +12,16 @@ from utils import load_documents, create_vector_store, setup_rag_chain
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
 DATA_DIR = "data"
 
+# Initialize RAG parameters in session state
+if "temperature" not in st.session_state:
+    st.session_state.temperature = 0.1
+if "chunk_size" not in st.session_state:
+    st.session_state.chunk_size = 1000
+if "chunk_overlap" not in st.session_state:
+    st.session_state.chunk_overlap = 200
+if "top_k" not in st.session_state:
+    st.session_state.top_k = 4
+
 st.set_page_config(
     page_title="Intelligent Document Search",
     layout="wide",
@@ -170,14 +180,21 @@ def get_ollama_models(host):
         return []
 
 # === Load Documents ===
-if 'documents' not in st.session_state:
-    try:
-        st.session_state.documents = load_documents(DATA_DIR)
-        if not st.session_state.documents:
-            st.warning(f"No documents found in the '{DATA_DIR}' directory.")
-    except Exception as e:
-        st.error(f"Error loading documents: {e}")
-        st.session_state.documents = []
+@st.cache_resource(show_spinner=False)
+def get_documents(data_dir, chunk_size, chunk_overlap):
+    return load_documents(data_dir, chunk_size, chunk_overlap)
+
+try:
+    st.session_state.documents = get_documents(
+        DATA_DIR,
+        st.session_state.chunk_size,
+        st.session_state.chunk_overlap
+    )
+    if not st.session_state.documents:
+        st.warning(f"No documents found in the '{DATA_DIR}' directory.")
+except Exception as e:
+    st.error(f"Error loading documents: {e}")
+    st.session_state.documents = []
 
 
 # === Request Queue ===
@@ -289,7 +306,7 @@ def render_math_content(content):
 
 # === Rag Initialization ===
 @st.cache_resource(show_spinner=False)
-def initialize_rag(model_name):
+def initialize_rag(model_name, temperature, top_k):
     if not model_name:
         return None
         
@@ -297,14 +314,14 @@ def initialize_rag(model_name):
         try:
             vector_store = create_vector_store(st.session_state.documents)
             retriever = vector_store.as_retriever(search_kwargs={"k": 4})
-            return setup_rag_chain(retriever, OLLAMA_HOST, model_name)
+            return setup_rag_chain(retriever, temperature, top_k, OLLAMA_HOST, model_name)
         except Exception as e:
             st.error(f"Failed to initialize RAG chain: {e}")
             return None
 
 # Initialize RAG dependent on the selected model
 if "selected_model_name" in st.session_state and st.session_state.selected_model_name:
-    st.session_state.rag_chain = initialize_rag(st.session_state.selected_model_name)
+    st.session_state.rag_chain = initialize_rag(st.session_state.selected_model_name, st.session_state.temperature, st.session_state.top_k)
 else:
     st.session_state.rag_chain = None
 
@@ -327,6 +344,46 @@ with st.sidebar:
     else:
         st.warning("No models available.")
         selected_model = None
+    
+    st.markdown("---")
+
+    st.header("⚙️ RAG Configuration")
+    st.session_state.temperature = st.slider(
+        "Temperature",
+        min_value=0.0,
+        max_value=1.0,
+        value=st.session_state.temperature,
+        step=0.05,
+        key="temperature_slider",
+        help="Controls the randomness of the model's output. Higher values mean more creative, lower values mean more deterministic."
+    )
+    st.session_state.chunk_size = st.number_input(
+        "Chunk Size",
+        min_value=100,
+        max_value=2000,
+        value=st.session_state.chunk_size,
+        step=50,
+        key="chunk_size_input",
+        help="The maximum number of characters in each document chunk."
+    )
+    st.session_state.chunk_overlap = st.number_input(
+        "Chunk Overlap",
+        min_value=0,
+        max_value=500,
+        value=st.session_state.chunk_overlap,
+        step=10,
+        key="chunk_overlap_input",
+        help="The number of characters to overlap between adjacent chunks. Helps maintain context."
+    )
+    st.session_state.top_k = st.number_input(
+        "Top K Documents",
+        min_value=1,
+        max_value=10,
+        value=st.session_state.top_k,
+        step=1,
+        key="top_k_input",
+        help="The number of most relevant documents to retrieve for answering the question."
+    )
     
     st.markdown("---")
 
