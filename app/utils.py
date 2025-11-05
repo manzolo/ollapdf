@@ -205,19 +205,30 @@ def get_document_stats(data_dir: str) -> Dict[str, Any]:
     
     return stats
 
-def test_rag_system(data_dir: str, test_query: str = "Hello, can you summarize the documents?"):
+def test_rag_system(
+    data_dir: str, 
+    test_query: str = "Hello, can you summarize the documents?",
+    chunk_size: int = 1000,
+    chunk_overlap: int = 200,
+    temperature: float = 0.1,
+    top_k: int = 3
+):
     """
     Tests the RAG system with an example query
     
     Args:
         data_dir: Path to the document folder
         test_query: Test query to use
+        chunk_size: Size of document chunks
+        chunk_overlap: Overlap between document chunks
+        temperature: The temperature for the LLM
+        top_k: The number of documents to retrieve
     """
     logger.info("🧪 Starting RAG system test")
     
     try:
         # Load documents
-        documents = load_documents(data_dir)
+        documents = load_documents(data_dir, chunk_size, chunk_overlap)
         if not documents:
             logger.error("No documents loaded")
             return
@@ -227,11 +238,11 @@ def test_rag_system(data_dir: str, test_query: str = "Hello, can you summarize t
         retriever = vector_store.as_retriever()
         
         # Configure RAG chain
-        rag_chain = setup_rag_chain(retriever)
+        rag_chain = setup_rag_chain(retriever, temperature, top_k)
         
         # Test query
         logger.info(f"Test query: {test_query}")
-        response = rag_chain.invoke({"query": test_query})
+        response = rag_chain.invoke({"input": test_query})
         
         logger.info("✅ Test completed successfully!")
         logger.info(f"Response: {response['answer'][:200]}...")
