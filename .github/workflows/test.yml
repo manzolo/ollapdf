@@ -25,6 +25,12 @@ jobs:
     - name: Pull Ollama base image
       run: docker pull ollama/ollama
 
+    - name: Cache Ollama models
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/ollama_data
+        key: ${{ runner.os }}-ollama-phi
+
     - name: Run temporary Ollama container to pre-pull phi model
       run: |
         docker run -d -p 11434:11434 --name temp-ollama -v ${{ github.workspace }}/ollama_data:/root/.ollama ollama/ollama
