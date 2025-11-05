@@ -27,7 +27,7 @@ jobs:
 
     - name: Run temporary Ollama container to pre-pull phi model
       run: |
-        docker run -d --name temp-ollama -v ${{ github.workspace }}/ollama_data:/root/.ollama ollama/ollama
+        docker run -d -p 11434:11434 --name temp-ollama -v ${{ github.workspace }}/ollama_data:/root/.ollama ollama/ollama
         ./wait-for-it.sh localhost:11434 --timeout=120 # Wait for temp ollama to be ready
         docker exec temp-ollama ollama pull phi
         docker stop temp-ollama
