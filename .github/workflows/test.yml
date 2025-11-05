@@ -22,6 +22,20 @@ jobs:
     - name: Clean up Docker resources (before)
       run: docker system prune -a -f --volumes
 
+    - name: Pull Ollama base image
+      run: docker pull ollama/ollama
+
+    - name: Run temporary Ollama container to pre-pull phi model
+      run: |
+        docker run -d --name temp-ollama -v ${{ github.workspace }}/ollama_data:/root/.ollama ollama/ollama
+        ./wait-for-it.sh localhost:11434 --timeout=120 # Wait for temp ollama to be ready
+        docker exec temp-ollama ollama pull phi
+        docker stop temp-ollama
+        docker rm temp-ollama
+
+    - name: Set OLLAMA_MODEL_NAME for app service
+      run: echo "OLLAMA_MODEL_NAME=phi" >> $GITHUB_ENV
+
     - name: Start services (CPU)
       run: make up-cpu
 
@@ -29,11 +43,9 @@ jobs:
       run: |
         ./wait-for-it.sh localhost:11434 --timeout=120
 
-    - name: Pull Ollama model (phi)
-      run: docker exec manzolo-ollapdf-ollama ollama pull phi
 
-    - name: Set OLLAMA_MODEL_NAME for app service
-      run: echo "OLLAMA_MODEL_NAME=phi" >> $GITHUB_ENV
+
+
 
     - name: Wait for Streamlit app to be ready
       run: |
