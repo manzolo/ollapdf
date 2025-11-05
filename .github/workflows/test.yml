@@ -19,8 +19,8 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Set OLLAMA_MODEL_NAME for app service
-      run: echo "OLLAMA_MODEL_NAME=phi" >> $GITHUB_ENV
+    - name: Clean up Docker resources (before)
+      run: docker builder prune -a -f --volumes
 
     - name: Pull Ollama base image
       run: docker pull ollama/ollama
@@ -39,12 +39,22 @@ jobs:
         docker stop temp-ollama
         docker rm temp-ollama
 
-    - name: Run stack
-      run: docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d --build
+    - name: Set OLLAMA_MODEL_NAME for app service
+      run: echo "OLLAMA_MODEL_NAME=phi" >> $GITHUB_ENV
+
+    - name: Clean Docker
+      run: docker builder prune -f && docker system prune -f
+      
+    - name: Start services (CPU)
+      run: make up-cpu
 
     - name: Wait for Ollama to be ready
       run: |
         ./wait-for-it.sh localhost:11434 --timeout=120
+
+
+
+
 
     - name: Wait for Streamlit app to be ready
       run: |
@@ -58,3 +68,7 @@ jobs:
     - name: Stop services
       if: always()
       run: make down
+
+    - name: Clean up Docker resources (after)
+      if: always()
+      run: docker system prune -a -f --volumes
