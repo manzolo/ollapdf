@@ -19,12 +19,6 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Cache Ollama models
-      uses: actions/cache@v3
-      with:
-        path: ${{ github.workspace }}/ollama_data
-        key: ${{ runner.os }}-ollama-phi
-
     - name: Set OLLAMA_MODEL_NAME for app service
       run: echo "OLLAMA_MODEL_NAME=phi" >> $GITHUB_ENV
 
