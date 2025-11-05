@@ -147,8 +147,8 @@ test-unit: .check-container
 	@docker exec manzolo-ollapdf-rag python -m pytest --version > /dev/null 2>&1 || \
 	(echo "📦 Installing pytest..."; \
 	 docker exec manzolo-ollapdf-rag pip install -q pytest pytest-cov pytest-mock)
-	@docker exec manzolo-ollapdf-rag pytest app/tests/ -v -m "not integration and not slow" 2>/dev/null || \
-	docker exec manzolo-ollapdf-rag pytest app/tests/ -v
+	@docker exec manzolo-ollapdf-rag pytest tests/ -v -m "not integration and not slow" 2>/dev/null || \
+	docker exec manzolo-ollapdf-rag pytest tests/ -v
 	@echo "✅ Unit tests completed!"
 
 test-integration: .check-container
@@ -156,7 +156,7 @@ test-integration: .check-container
 	@docker exec manzolo-ollapdf-rag python -m pytest --version > /dev/null 2>&1 || \
 	(echo "📦 Installing pytest..."; \
 	 docker exec manzolo-ollapdf-rag pip install -q pytest pytest-cov pytest-mock)
-	@docker exec manzolo-ollapdf-rag pytest app/tests/ -v -m integration 2>/dev/null || \
+	@docker exec manzolo-ollapdf-rag pytest tests/ -v -m integration 2>/dev/null || \
 	echo "⚠️  No integration tests found or pytest markers not configured"
 	@echo "✅ Integration tests completed!"
 

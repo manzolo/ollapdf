@@ -65,7 +65,10 @@ css_content = load_css()
 html_head = get_html_head()
 math_script = render_math_script()
 
-st.markdown(f"{html_head}<style>{css_content}</style>{math_script}", unsafe_allow_html=True)
+st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+st.markdown(f"""{html_head}
+{math_script}
+""", unsafe_allow_html=True)
 
 # =================================================================
 # === Helper Functions ===

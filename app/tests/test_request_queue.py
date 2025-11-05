@@ -37,7 +37,7 @@ class TestRequestQueue:
         position = queue.get_queue_position("nonexistent_id")
         assert position == -1
 
-
+@pytest.mark.integration
 class TestRequestQueueIntegration:
     """Integration tests for RequestQueue."""
 
@@ -71,3 +71,4 @@ class TestRequestQueueIntegration:
         assert status['status'] == 'completed'
         assert 'response' in status
         assert status['response']['answer'] == "Response to: Test query"
+
