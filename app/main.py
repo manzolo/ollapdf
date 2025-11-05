@@ -56,22 +56,40 @@ def init_session_state():
 
 init_session_state()
 
+# logger.info("Streamlit session state initialized.")
+
 # =================================================================
+
 # === Styling ===
+
 # =================================================================
+
+
 
 # Load CSS and JavaScript
+
 css_content = load_css()
+
 html_head = get_html_head()
+
 math_script = render_math_script()
 
+
+
 st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+
 st.markdown(f"""{html_head}
+
 {math_script}
+
 """, unsafe_allow_html=True)
 
+# logger.info("UI styling and scripts loaded.")
+
 # =================================================================
+
 # === Helper Functions ===
+
 # =================================================================
 
 @st.cache_data(ttl=3600)
@@ -81,11 +99,15 @@ def get_ollama_models(host: str):
         if host.startswith("http"):
             resp = requests.get(f"{host}/api/tags", timeout=5)
             resp.raise_for_status()
-            return [m['name'] for m in resp.json().get('models', [])]
+            models = [m['name'] for m in resp.json().get('models', [])]
+            logger.info(f"Successfully fetched {len(models)} Ollama models from {host}.")
+            return models
         else:
+            logger.info(f"Ollama host {host} does not start with http, returning empty model list.")
             return []
     except requests.exceptions.ConnectionError:
         st.error(f"Cannot connect to Ollama at {host}. Please check the server status.")
+        logger.error(f"Connection error when fetching Ollama models from {host}.")
         return []
     except Exception as e:
         logger.error(f"Error fetching Ollama models: {e}")
@@ -96,13 +118,19 @@ def get_ollama_models(host: str):
 def get_documents(data_dir: str, chunk_size: int, chunk_overlap: int):
     """Load and process documents."""
     processor = DocumentProcessor(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    return processor.load_documents(data_dir)
+    docs = processor.load_documents(data_dir)
+    if docs:
+        logger.info(f"Successfully loaded {len(docs)} documents from {data_dir}.")
+    else:
+        logger.info(f"No documents found in {data_dir}.")
+    return docs
 
 
 @st.cache_resource(show_spinner=False)
 def initialize_rag(model_name: str, temperature: float, top_k: int):
     """Initialize RAG chain."""
     if not model_name:
+        logger.warning("RAG chain not initialized: No model name provided.")
         return None
 
     with st.spinner(f"Loading and analyzing documents with the `{model_name}` model..."):
@@ -115,7 +143,9 @@ def initialize_rag(model_name: str, temperature: float, top_k: int):
                 top_k=top_k,
                 timeout=config.llm_timeout
             )
-            return rag_service.initialize(st.session_state.documents)
+            rag_chain = rag_service.initialize(st.session_state.documents)
+            logger.info(f"RAG chain initialized successfully with model: {model_name}, temperature: {temperature}, top_k: {top_k}.")
+            return rag_chain
         except Exception as e:
             st.error(f"Failed to initialize RAG chain: {e}")
             logger.error(f"RAG initialization error: {e}")
@@ -302,16 +332,19 @@ for request_id in list(st.session_state.pending_requests.keys()):
 
         st.session_state.messages.append(message_data)
         del st.session_state.pending_requests[request_id]
+        logger.info(f"Request {request_id} completed successfully.")
         st.rerun()
 
     elif request_data and request_data['status'] == 'error':
         error_msg = f'<div class="error-status"><i class="fas fa-exclamation-triangle"></i> Error: {request_data.get("error", "Unknown error")}</div>'
         st.session_state.messages.append({"role": "assistant", "content": error_msg, "is_error": True})
         del st.session_state.pending_requests[request_id]
+        logger.error(f"Request {request_id} failed with error: {request_data.get("error", "Unknown error")}")
         st.rerun()
 
 # Chat input
 if prompt := st.chat_input("Type your question here..."):
+    logger.info(f"User submitted prompt: {prompt}")
     if st.session_state.rag_chain is None:
         st.warning("Please select an Ollama model before submitting a question.")
     elif not st.session_state.documents:

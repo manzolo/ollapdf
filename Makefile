@@ -59,19 +59,19 @@ help:
 
 up-self:
 	@echo "🚀 Starting OllaPDF (standalone)..."
-	docker compose -f docker-compose.yml up -d --build
+	docker compose -f docker-compose.yml up -d --remove-orphans --build
 	@echo "✅ OllaPDF started at http://localhost:8501"
 
 up-cpu:
 	@echo "🚀 Starting OllaPDF + Ollama (CPU)..."
-	docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d --build
+	docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d --remove-orphans --build
 	@echo "✅ Services started:"
 	@echo "   - OllaPDF: http://localhost:8501"
 	@echo "   - Ollama: http://localhost:11434"
 
 up-gpu:
 	@echo "🚀 Starting OllaPDF + Ollama (GPU)..."
-	docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+	docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --remove-orphans --build
 	@echo "✅ Services started:"
 	@echo "   - OllaPDF: http://localhost:8501"
 	@echo "   - Ollama: http://localhost:11434"
@@ -94,7 +94,7 @@ rebuild:
 
 logs:
 	@echo "📋 Showing logs (Ctrl+C to exit)..."
-	docker logs -f manzolo-ollapdf-rag 2>/dev/null || \
+	docker logs -f manzolo-ollapdf-rag || \
 	docker compose -f docker-compose.yml -f docker-compose.cpu.yml -f docker-compose.gpu.yml logs -f
 
 shell:
