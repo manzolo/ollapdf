@@ -19,9 +19,6 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Clean up Docker resources (before)
-      run: docker builder prune -a -f --volumes
-
     - name: Pull Ollama base image
       run: docker pull ollama/ollama
 
@@ -42,11 +39,14 @@ jobs:
     - name: Set OLLAMA_MODEL_NAME for app service
       run: echo "OLLAMA_MODEL_NAME=phi" >> $GITHUB_ENV
 
+    - name: Docker build
+      run: docker compose -f docker-compose.yml -f docker-compose.cpu.yml build
+      
     - name: Clean Docker
       run: docker builder prune -f && docker system prune -f
       
     - name: Start services (CPU)
-      run: make up-cpu
+      run: docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d
 
     - name: Wait for Ollama to be ready
       run: |
