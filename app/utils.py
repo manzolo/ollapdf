@@ -254,10 +254,42 @@ def test_rag_system(
         logger.error(f"❌ Error in test: {str(e)}")
         raise
 
+def _initialize_rag_core(
+    documents: List[Document],
+    model_name: str,
+    temperature: float,
+    top_k: int,
+    ollama_host: str = "http://ollama:11434"
+):
+    """
+    Initialize RAG chain from documents (used by tests).
+
+    Args:
+        documents: List of document chunks
+        model_name: Ollama model name
+        temperature: LLM temperature
+        top_k: Number of documents to retrieve
+        ollama_host: Ollama service URL
+
+    Returns:
+        Configured RAG chain
+    """
+    if not documents:
+        logger.error("No documents provided")
+        return None
+
+    try:
+        vector_store = create_vector_store(documents)
+        retriever = vector_store.as_retriever(search_kwargs={"k": top_k})
+        return setup_rag_chain(retriever, temperature, top_k, ollama_host, model_name)
+    except Exception as e:
+        logger.error(f"Error initializing RAG core: {str(e)}")
+        return None
+
 if __name__ == "__main__":
     # System test
     DATA_DIR = "data"
-    
+
     # Show statistics
     stats = get_document_stats(DATA_DIR)
     print(f"\n📊 Document Statistics:")
@@ -265,7 +297,7 @@ if __name__ == "__main__":
     print(f"PDFs found: {stats['pdf_count']}")
     print(f"Total size: {stats['total_size_mb']} MB")
     print(f"PDF files: {stats['pdf_files']}")
-    
+
     # Test the system
     if stats['pdf_count'] > 0:
         test_rag_system(DATA_DIR)

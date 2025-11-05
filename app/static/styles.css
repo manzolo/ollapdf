@@ -1,0 +1,95 @@
+:root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --text: #c9d1d9;
+    --text-secondary: #8b949e;
+    --primary: #58a6ff;
+    --accent: #58a6ff;
+    --border: #30363d;
+    --success: #3fb950;
+    --warning: #e3b341;
+    --error: #f85149;
+}
+
+.stApp, .main {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    font-family: 'Source Sans Pro', -apple-system, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, p, span, div, label {
+    color: var(--text) !important;
+}
+
+.assistant-message {
+    background: var(--surface);
+    border-left: 4px solid var(--primary);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+    color: var(--text);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.think-section {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 10px 0;
+    font-family: monospace;
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.queue-status {
+    background: #3d3000 !important;
+    color: var(--warning) !important;
+    border: 1px solid #b8860b !important;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 12px 0;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.queue-status i {
+    margin-right: 8px;
+}
+
+.processing-status {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 12px 0;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(88, 166, 255, 0.5);
+    animation: pulse 1.8s infinite;
+}
+.processing-status i {
+    margin-right: 8px;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.error-status {
+    background: #492a2a !important;
+    color: var(--error) !important;
+    border: 1px solid #f85149 !important;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 12px 0;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.error-status i {
+    margin-right: 8px;
+}

@@ -1,18 +1,24 @@
 streamlit==1.38.0
 pypdf==4.3.1
 python-dotenv==1.0.1
+requests
 
-# LangChain v1.0 - Tutte le dipendenze principali fisse su v1.0
+# LangChain v1.0 - Core dependencies
 langchain==1.0.3
 langchain-classic==1.0.0
 langchain-ollama==1.0.0
-langchain-huggingface==1.0.0  # ← UPGRADE: Compatibile con v1.0 e langchain-core >=1.0.0
+langchain-huggingface==1.0.0
 
-# Sub-pacchetti: Rilassati per auto-risoluzione (pip sceglie ~1.0.x)
+# LangChain sub-packages
 langchain-core>=1.0.0,<2.0.0
 langchain-community>=0.3.0
 langchain-text-splitters>=0.3.0
 
-# Altri
+# Vector store and embeddings
 faiss-cpu==1.8.0.post1
 sentence-transformers==3.1.1
+
+# Testing
+pytest==8.3.4
+pytest-cov==6.0.0
+pytest-mock==3.14.0
