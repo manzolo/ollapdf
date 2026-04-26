@@ -31,7 +31,8 @@ help:
 	@echo "  make test          - Run all tests (requires container running)"
 	@echo "  make test-auto     - Auto-start container and run tests"
 	@echo "  make test-unit     - Run unit tests only"
-	@echo "  make test-integration - Run integration tests"
+	@echo "  make test-integration - Run integration tests (container must be running)"
+	@echo "  make test-integration-local - Start env + tinyllama + run integration tests"
 	@echo "  make test-e2e      - Run end-to-end tests"
 	@echo "  make test-rag      - Run manual RAG system test"
 	@echo "  make test-coverage - Run tests with coverage report"
@@ -153,11 +154,21 @@ test-unit: .check-container
 
 test-integration: .check-container
 	@echo "🧪 Running integration tests..."
-	@docker exec manzolo-ollapdf-rag python -m pytest --version > /dev/null 2>&1 || \
-	(echo "📦 Installing pytest..."; \
-	 docker exec manzolo-ollapdf-rag pip install -q pytest pytest-cov pytest-mock)
 	@docker exec manzolo-ollapdf-rag pytest tests/ -v -m integration 2>/dev/null || \
-	echo "⚠️  No integration tests found or pytest markers not configured"
+	echo "⚠️  No integration tests found or Ollama not reachable"
+	@echo "✅ Integration tests completed!"
+
+# Start services without dots-ocr + pull tinyllama + run integration tests
+test-integration-local:
+	@echo "🧪 Starting integration test environment (tinyllama, no OCR)..."
+	@export OLLAMA_MODEL_NAME=tinyllama; \
+	docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build; \
+	./wait-for-it.sh localhost:11434 --timeout=120; \
+	docker exec manzolo-ollapdf-ollama ollama pull tinyllama; \
+	./wait-for-it.sh localhost:8501 --timeout=60; \
+	sleep 10; \
+	docker exec manzolo-ollapdf-rag python -m pytest tests/ -v -m integration; \
+	docker compose -f docker-compose.yml -f docker-compose.ci.yml down
 	@echo "✅ Integration tests completed!"
 
 test-e2e:
