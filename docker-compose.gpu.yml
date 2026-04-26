@@ -16,6 +16,28 @@ services:
     networks:
       - ollapdf-net
 
+  dots-ocr:
+    image: vllm/vllm-openai:v0.11.1
+    container_name: manzolo-ollapdf-dots-ocr
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8000:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    networks:
+      - ollapdf-net
+
   ollapdf:
     depends_on:
       - ollama
+      - dots-ocr
+
+volumes:
+  huggingface-cache:
+    driver: local

@@ -10,7 +10,7 @@ import streamlit as st
 
 # Local imports
 from config import config
-from core import DocumentProcessor, RAGService
+from core import DocumentProcessor, RAGService, OCRService
 from services import RequestQueue
 from ui import clean_response, extract_think_content, load_css, render_math_script, get_html_head
 
@@ -117,7 +117,15 @@ def get_ollama_models(host: str):
 @st.cache_resource(show_spinner=False)
 def get_documents(data_dir: str, chunk_size: int, chunk_overlap: int):
     """Load and process documents."""
-    processor = DocumentProcessor(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    ocr_service = None
+    if config.ocr_api_url:
+        ocr_service = OCRService(config.ocr_api_url, config.ocr_api_token)
+    processor = DocumentProcessor(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        ocr_service=ocr_service,
+        ocr_min_text_length=config.ocr_min_text_length,
+    )
     docs = processor.load_documents(data_dir)
     if docs:
         logger.info(f"Successfully loaded {len(docs)} documents from {data_dir}.")

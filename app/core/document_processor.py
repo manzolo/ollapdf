@@ -1,10 +1,16 @@
 """Document processing module."""
+import io
 import os
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+
+try:
+    from pdf2image import convert_from_path
+except ImportError:
+    convert_from_path = None
 
 logger = logging.getLogger(__name__)
 
@@ -12,16 +18,17 @@ logger = logging.getLogger(__name__)
 class DocumentProcessor:
     """Handles document loading and processing."""
 
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
-        """
-        Initialize document processor.
-
-        Args:
-            chunk_size: Maximum number of characters in each chunk
-            chunk_overlap: Number of characters to overlap between chunks
-        """
+    def __init__(
+        self,
+        chunk_size: int = 1000,
+        chunk_overlap: int = 200,
+        ocr_service=None,
+        ocr_min_text_length: int = 50,
+    ):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
+        self.ocr_service = ocr_service
+        self.ocr_min_text_length = ocr_min_text_length
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
@@ -88,17 +95,36 @@ class DocumentProcessor:
         return pdf_files
 
     def _load_single_pdf(self, filepath: str, filename: str) -> List[Document]:
-        """Load a single PDF file."""
+        """Load a single PDF file, using OCR for scanned pages when available."""
         logger.info(f"Loading: {filename}")
         loader = PyPDFLoader(filepath)
         pdf_documents = loader.load()
 
-        # Add source file info to metadata
+        ocr_count = 0
+        use_ocr = self.ocr_service is not None and self.ocr_service.is_available()
+
         for doc in pdf_documents:
             doc.metadata.update({
                 'source_file': filename,
-                'source_path': filepath
+                'source_path': filepath,
             })
+
+            if use_ocr and len(doc.page_content.strip()) < self.ocr_min_text_length:
+                page_num = doc.metadata.get('page', 0)
+                try:
+                    images = convert_from_path(filepath, first_page=page_num + 1, last_page=page_num + 1)
+                    if images:
+                        buf = io.BytesIO()
+                        images[0].save(buf, format="PNG")
+                        ocr_text = self.ocr_service.extract_text_from_image(buf.getvalue(), "image/png")
+                        doc.page_content = ocr_text
+                        doc.metadata['ocr'] = True
+                        ocr_count += 1
+                except Exception as e:
+                    logger.warning(f"OCR failed for page {page_num} of {filename}: {e}")
+
+        if ocr_count:
+            logger.info(f"  OCR applied to {ocr_count}/{len(pdf_documents)} pages of {filename}")
 
         return pdf_documents
 

@@ -9,6 +9,21 @@ services:
     networks:
       - ollapdf-net
 
+  dots-ocr:
+    image: dots-ocr-cpu:v0.11.1
+    container_name: manzolo-ollapdf-dots-ocr
+    ports:
+      - "8000:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
+    networks:
+      - ollapdf-net
+
   ollapdf:
     depends_on:
       - ollama
+      - dots-ocr
+
+volumes:
+  huggingface-cache:
+    driver: local

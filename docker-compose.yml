@@ -13,6 +13,9 @@ services:
       - DEFAULT_CHUNK_SIZE=${DEFAULT_CHUNK_SIZE}
       - DEFAULT_CHUNK_OVERLAP=${DEFAULT_CHUNK_OVERLAP}
       - DEFAULT_TOP_K=${DEFAULT_TOP_K}
+      - OCR_API_URL=${OCR_API_URL:-}
+      - OCR_API_TOKEN=${OCR_API_TOKEN:-}
+      - OCR_MIN_TEXT_LENGTH=${OCR_MIN_TEXT_LENGTH:-50}
     networks:
       - ollapdf-net
 

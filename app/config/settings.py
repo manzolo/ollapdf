@@ -32,6 +32,11 @@ class AppConfig:
     # LLM settings
     llm_timeout: int
 
+    # OCR settings
+    ocr_api_url: str
+    ocr_api_token: str
+    ocr_min_text_length: int
+
 
 def load_config() -> AppConfig:
     """
@@ -65,6 +70,11 @@ def load_config() -> AppConfig:
 
         # LLM settings
         llm_timeout=int(os.getenv("LLM_TIMEOUT", "300")),
+
+        # OCR settings
+        ocr_api_url=os.getenv("OCR_API_URL", ""),
+        ocr_api_token=os.getenv("OCR_API_TOKEN", ""),
+        ocr_min_text_length=int(os.getenv("OCR_MIN_TEXT_LENGTH", "50")),
     )
 
 
