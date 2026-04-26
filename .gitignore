@@ -3,3 +3,5 @@ data/*
 ollama_data/*
 !ollama_data/.gitkeep
 .env
+**/__pycache__/
+**/*.pyc
