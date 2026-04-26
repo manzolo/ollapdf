@@ -1,170 +1,167 @@
 # OllaPDF: Your Local Document Chat Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/manzolo/ollapdf/actions/workflows/test.yml/badge.svg)](https://github.com/manzolo/ollapdf/actions/workflows/test.yml)
 
-OllaPDF is a powerful, locally-hosted document search application. It allows you to chat with your PDF documents using the power of Large Language Models (LLMs) through Ollama, ensuring your data remains private and secure on your own machine.
-
-## The Problem
-
-Have you ever needed to find specific information buried deep within dozens of PDF files? Traditional search is often not smart enough to understand the context of your questions. OllaPDF solves this by using a Retrieval-Augmented Generation (RAG) pipeline to provide intelligent, context-aware answers.
+OllaPDF is a locally-hosted document chat application. It allows you to ask questions about your PDF documents using Large Language Models via Ollama, keeping all data private on your own machine.
 
 ## Features
 
-*   **Intuitive Chat Interface:** Ask questions in natural language.
-*   **Local First:** All processing is done locally. Your documents and queries never leave your machine.
-*   **Powered by Ollama:** Easily integrate with any model supported by Ollama (e.g., Llama, Mistral, etc.).
-*   **Easy to Use:** Simply place your PDFs in a directory and start the application.
-*   **Dockerized:** Runs in a container for easy setup and consistent performance.
+- **Intuitive Chat Interface:** Ask questions in natural language via Streamlit.
+- **Local First:** All processing is done locally. Documents and queries never leave your machine.
+- **Powered by Ollama:** Works with any model supported by Ollama (Llama, Mistral, Phi, etc.).
+- **OCR Support:** Hybrid processing for scanned PDFs — native text extraction with automatic fallback to [dots.ocr](https://github.com/manzolo/dots.ocr) for image-only pages.
+- **RAG Pipeline:** FAISS vector store + HuggingFace embeddings for accurate context retrieval.
+- **Dockerized:** Runs fully containerized for easy setup.
 
 ## Screenshots
 
-Here are some screenshots of the OllaPDF application interface:
-
-<img width="1880" height="977" alt="OllaPDF Application Screenshot 1" src="https://github.com/user-attachments/assets/5132217f-e056-42f5-82f1-66fb3d2e1d4d" />
-<img width="1880" height="977" alt="OllaPDF Application Screenshot 2" src="https://github.com/user-attachments/assets/ad20b49f-d340-4adf-b162-e943731f8991" />
-<img width="1880" height="977" alt="OllaPDF Application Screenshot 3" src="https://github.com/user-attachments/assets/b7742936-dc65-4235-8dd7-ad4569b9e62c" />
-<img width="1880" height="977" alt="OllaPDF Application Screenshot 4" src="https://github.com/user-attachments/assets/c8a055d4-3cb0-4a44-b50d-b18e4640a72d" />
-
+<img width="1880" height="977" alt="OllaPDF Screenshot 1" src="https://github.com/user-attachments/assets/5132217f-e056-42f5-82f1-66fb3d2e1d4d" />
+<img width="1880" height="977" alt="OllaPDF Screenshot 2" src="https://github.com/user-attachments/assets/ad20b49f-d340-4adf-b162-e943731f8991" />
+<img width="1880" height="977" alt="OllaPDF Screenshot 3" src="https://github.com/user-attachments/assets/b7742936-dc65-4235-8dd7-ad4569b9e62c" />
+<img width="1880" height="977" alt="OllaPDF Screenshot 4" src="https://github.com/user-attachments/assets/c8a055d4-3cb0-4a44-b50d-b18e4640a72d" />
 
 ## How It Works
 
-
-
 OllaPDF uses a RAG (Retrieval-Augmented Generation) architecture:
 
-1.  **Document Loading:** PDFs in the `data` directory are loaded and split into smaller chunks.
-2.  **Vector Embeddings:** The text chunks are converted into numerical representations (embeddings) using a sentence-transformer model.
-3.  **Vector Store:** These embeddings are stored in a FAISS vector store for efficient searching.
-4.  **Retrieval:** When you ask a question, the application searches the vector store for the most relevant document chunks.
-5.  **Generation:** The retrieved chunks are passed as context to an LLM (via Ollama), which then generates a natural language answer.
+1. **Document Loading:** PDFs in `data/` are loaded. Native text is extracted via PyPDF; scanned pages (below the configurable text threshold) are sent to the OCR service if configured.
+2. **Vector Embeddings:** Text chunks are converted to embeddings using a sentence-transformer model.
+3. **Vector Store:** Embeddings are stored in a FAISS index for fast similarity search.
+4. **Retrieval:** Your question is matched against the index to find the most relevant chunks.
+5. **Generation:** The retrieved chunks are passed as context to an Ollama LLM, which generates the answer.
 
 ## Tech Stack
 
-*   **Backend:** Python
-*   **Web Framework:** Streamlit
-*   **LLM Orchestration:** LangChain
-*   **LLM Provider:** Ollama
-*   **Vector Store:** FAISS
-*   **Containerization:** Docker
+| Component | Technology |
+|---|---|
+| Web UI | Streamlit |
+| LLM orchestration | LangChain |
+| LLM provider | Ollama |
+| Vector store | FAISS |
+| Embeddings | sentence-transformers (HuggingFace) |
+| OCR (optional) | dots.ocr via vLLM |
+| Containerization | Docker |
 
 ## Getting Started
 
-This project is designed to be easy to set up and run using Docker Compose.
-
 ### Prerequisites
 
-*   [Docker](https://www.docker.com/get-started)
-*   [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker](https://www.docker.com/get-started) + [Docker Compose](https://docs.docker.com/compose/install/)
 
-### 1. Clone the Repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/manzolo/ollapdf.git
 cd ollapdf
 ```
 
-### 2. Configure Environment Variables
-
-Copy the example environment file and customize it:
+### 2. Configure environment variables
 
 ```bash
 cp .env.dist .env
-# Open .env in your editor and modify variables as needed
 ```
 
-This file (`.env`) is used to configure variables like `OLLAMA_HOST` and `OLLAMA_MODEL_NAME`.
+Edit `.env` as needed:
 
-### 3. Add Your Documents
+```dotenv
+OLLAMA_HOST=http://ollama:11434
+OLLAMA_MODEL_NAME=llama2
+DEFAULT_TEMPERATURE=0.1
+DEFAULT_CHUNK_SIZE=1000
+DEFAULT_CHUNK_OVERLAP=200
+DEFAULT_TOP_K=4
 
-Place your PDF files into the `data/` directory. A sample PDF (`sample.pdf`) is included to demonstrate the application's functionality.
+# OCR — optional, leave empty to disable
+OCR_API_URL=
+OCR_API_TOKEN=
+OCR_MIN_TEXT_LENGTH=50
+```
 
-### 3. Start the Application
+### 3. Add your PDFs
 
-There are three ways to run the application, depending on your needs.
+Place PDF files in the `data/` directory.
 
-**Option 1: I already have Ollama running**
+### 4. Start the application
 
-If you have your own instance of Ollama running, you can start the OllaPDF application by itself:
-
+**Option A — External Ollama (you already have it running):**
 ```bash
 docker compose up -d --build
 ```
 
-The OllaPDF container will be named `manzolo-ollapdf-rag`, which can be useful for commands like `docker exec` or `docker logs`.
-
-**Option 2: I want to run Ollama in a CPU container**
-
-If you want to run both OllaPDF and Ollama as containers, use the `docker-compose.cpu.yml` file:
-
+**Option B — CPU-only (Ollama + optional OCR in containers):**
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d --build
 ```
 
-**Option 3: I want to run Ollama in a GPU container (NVIDIA)**
-
-If you have an NVIDIA GPU, you can run both OllaPDF and Ollama with GPU support using the `docker-compose.gpu.yml` file:
-
+**Option C — GPU / NVIDIA:**
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
 ```
+> For the NVIDIA Container Toolkit setup see [this guide](https://www.manzolo.it/2025/11/installing-nvidia-container-toolkit/).
 
-**Note:** If you need to install the NVIDIA Container Toolkit for GPU support, you can find a detailed guide on [Manzolo's website](https://www.manzolo.it/2025/11/installing-nvidia-container-toolkit/).
-
-### 4. Pull an Ollama Model
-
-After starting the services (using Option 2 or 3), you need to pull a language model for Ollama to use. You can do this by executing a command inside the running Ollama container.
-
-1.  **Find the Ollama container ID or name:**
-    ```bash
-    docker ps
-    ```
-    Look for the container with `ollama/ollama` in the `IMAGE` column.
-    If you are using `docker-compose.cpu.yml` or `docker-compose.gpu.yml`, the Ollama container will be named `manzolo-ollapdf-ollama`.
-
-2.  **Pull a model:**
-    The default model is `llama2`. You can pull it with the following command:
-    ```bash
-    docker exec -it manzolo-ollapdf-ollama ollama pull llama2
-    ```
-
-    If you want to use a different model, you can change the `OLLAMA_MODEL_NAME` environment variable in the `docker-compose.yml` file and pull the corresponding model.
-
-### 5. Access OllaPDF
-
-Open your web browser and navigate to `http://localhost:8501`.
-
-## Viewing Container Logs
-
-To view the logs of a running container, you can use the `docker logs` command followed by the container's name.
-
-For the OllaPDF application container:
+### 5. Pull an Ollama model
 
 ```bash
-docker logs manzolo-ollapdf-rag
+docker exec -it manzolo-ollapdf-ollama ollama pull llama2
 ```
 
-For the Ollama container (if running via `docker-compose.cpu.yml` or `docker-compose.gpu.yml`):
+### 6. Open the app
+
+Navigate to `http://localhost:8501`.
+
+## OCR for Scanned PDFs
+
+OllaPDF supports automatic OCR via [dots.ocr](https://github.com/manzolo/dots.ocr), a vision-language model served through vLLM.
+
+OCR is **opt-in**: set `OCR_API_URL` in your `.env` to enable it. When enabled, any PDF page with fewer than `OCR_MIN_TEXT_LENGTH` characters of native text is automatically converted to an image and sent to the OCR service.
+
+The `docker-compose.cpu.yml` and `docker-compose.gpu.yml` files include a `dots-ocr` service. Build the CPU image first using the [dots-ocr-manager script](https://github.com/manzolo/dots.ocr).
+
+## Useful Commands
 
 ```bash
-docker logs manzolo-ollapdf-ollama
-```
-
-You can also add the `-f` flag to follow the logs in real-time:
-
-```bash
+# View app logs
 docker logs -f manzolo-ollapdf-rag
+
+# View Ollama logs
+docker logs -f manzolo-ollapdf-ollama
+
+# Stop all services
+make down
+
+# Open a shell in the app container
+make shell
+
+# List available Makefile targets
+make help
 ```
+
+## Testing
+
+```bash
+# Unit tests only (no external services needed)
+docker build -t ollapdf-test . && docker run --rm ollapdf-test python -m pytest tests/ -v -m "not integration"
+
+# Full integration tests (Ollama + OCR mock, auto-managed)
+make test-integration-local
+```
+
+The CI pipeline runs automatically on every push:
+- **unit-tests** — 43 tests, ~3 min, no external services
+- **integration-tests** — OCR path (mock server) + RAG end-to-end (tinyllama), ~7 min
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue.
+Pull requests and issues are welcome.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
 
 ## Acknowledgments
 
-*   [Streamlit](https://streamlit.io/)
-*   [LangChain](https://www.langchain.com/)
-*   [Ollama](https://ollama.ai/)
+- [Streamlit](https://streamlit.io/)
+- [LangChain](https://www.langchain.com/)
+- [Ollama](https://ollama.ai/)
+- [dots.ocr](https://github.com/manzolo/dots.ocr)
