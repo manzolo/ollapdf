@@ -170,6 +170,8 @@ MIT — see [LICENSE](LICENSE).
 
 ## 🧠 Local AI Lab
 
+[![Local AI Lab](https://img.shields.io/badge/🧠_Local_AI_Lab-member-6e40c9?style=for-the-badge)](https://github.com/manzolo/local-ai-lab)
+
 This project is part of **[manzolo's Local AI Lab](https://github.com/manzolo/local-ai-lab)** — a family of self-hosted AI projects (LLM, voice, vision & documents) that share the same conventions and can be wired together through the shared `local-ai-net` Docker network.
 
 This repo ships a `docker-compose.local-ai.yml` override to join the shared network — see the [conventions](https://github.com/manzolo/local-ai-lab#conventions).
