@@ -1,0 +1,17 @@
+# Local AI Lab override — join the shared `local-ai-net` Docker network
+# and use the family Ollama instance (container `ollama`, port 11434).
+# Convention: https://github.com/manzolo/local-ai-lab#conventions
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.local-ai.yml up -d
+
+services:
+  ollapdf:
+    networks:
+      - local-ai-net
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+
+networks:
+  local-ai-net:
+    external: true
