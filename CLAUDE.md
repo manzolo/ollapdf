@@ -14,7 +14,7 @@ app/
   core/
     document_processor.py  # PDF loading, hybrid OCR logic, chunking
     ocr_service.py         # HTTP client for dots.ocr (OpenAI-compatible API)
-    rag_service.py         # FAISS vector store + LangChain RAG chain
+    rag_service.py         # FAISS vector store + LangChain RAG chain, system prompt
   services/
     request_queue.py       # Concurrent request throttling
   ui/
@@ -26,6 +26,7 @@ app/
     test_ocr_service.py             # unit — HTTP client
     test_request_queue.py           # unit + integration marker
     test_text_processing.py         # unit
+    test_rag_prompt.py              # unit — configurable system prompt
     test_integration_rag.py         # integration — real Ollama (tinyllama)
     test_integration_ocr.py         # integration — scanned PDF + mock OCR server
 ```
@@ -55,7 +56,7 @@ app/
 ## CI pipeline (`.github/workflows/test.yml`)
 
 Two sequential jobs:
-1. **unit-tests** — `docker build` + `pytest -m "not integration"` (43 tests, ~3 min)
+1. **unit-tests** — `docker build` + `pytest -m "not integration"` (50 tests, ~3 min)
 2. **integration-tests** — full stack via `docker-compose.ci.yml` with `OLLAMA_MODEL_NAME=tinyllama`:
    - OCR path: image-only PDF + in-process mock HTTP server → verifies `metadata['ocr']=True`
    - RAG path: real Ollama query → verifies non-empty answer
@@ -80,6 +81,8 @@ make test-integration-local
 | `DEFAULT_CHUNK_SIZE` | `1000` | |
 | `DEFAULT_CHUNK_OVERLAP` | `200` | |
 | `DEFAULT_TOP_K` | `4` | |
+| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | English-only: use a multilingual model when questions and PDFs differ in language |
+| `SYSTEM_PROMPT` | `` (empty) | Empty = `DEFAULT_SYSTEM_PROMPT` in `rag_service.py`. `{context}` is the only template variable (appended if missing, other braces escaped) |
 | `OCR_API_URL` | `` (empty) | Leave empty to disable OCR |
 | `OCR_API_TOKEN` | `` | Bearer token for dots.ocr |
 | `OCR_MIN_TEXT_LENGTH` | `50` | Pages below this char count trigger OCR |

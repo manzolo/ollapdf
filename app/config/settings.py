@@ -26,6 +26,9 @@ class AppConfig:
     # Embeddings settings
     embedding_model: str
 
+    # Prompt settings (empty = built-in default, see core/rag_service.py)
+    system_prompt: str
+
     # Queue settings
     max_concurrent_requests: int
 
@@ -64,6 +67,9 @@ def load_config() -> AppConfig:
             "EMBEDDING_MODEL",
             "sentence-transformers/all-MiniLM-L6-v2"
         ),
+
+        # Prompt settings
+        system_prompt=os.getenv("SYSTEM_PROMPT", ""),
 
         # Queue settings
         max_concurrent_requests=int(os.getenv("MAX_CONCURRENT_REQUESTS", "1")),

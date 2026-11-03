@@ -11,6 +11,37 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_SYSTEM_PROMPT = (
+    "Use the provided context to answer the question. "
+    "If you don't know the answer, say you don't know. "
+    "Answer in the same language as the question. "
+    "Use a maximum of three sentences and keep the answer concise. "
+    "Context: {context}"
+)
+
+
+def build_system_prompt(template: Optional[str] = None) -> str:
+    """
+    Turn a user-supplied system prompt into a safe ChatPromptTemplate string.
+
+    The only placeholder is {context}: every other brace is escaped, so a prompt
+    that asks for LaTeX (e.g. "\\frac{a}{b}") does not become a template variable.
+    If {context} is missing it is appended, otherwise the retrieved chunks would
+    never reach the model.
+
+    Args:
+        template: Custom system prompt; None or blank uses DEFAULT_SYSTEM_PROMPT
+
+    Returns:
+        System prompt with exactly the {context} variable
+    """
+    if not template or not template.strip():
+        return DEFAULT_SYSTEM_PROMPT
+    text = template.strip()
+    if "{context}" not in text:
+        text += "\n\nContext: {context}"
+    return text.replace("{", "{{").replace("}", "}}").replace("{{context}}", "{context}")
+
 
 class RAGService:
     """Manages RAG pipeline components."""
@@ -22,7 +53,8 @@ class RAGService:
         model_name: str = "llama2",
         temperature: float = 0.1,
         top_k: int = 4,
-        timeout: int = 300
+        timeout: int = 300,
+        system_prompt: Optional[str] = None
     ):
         """
         Initialize RAG service.
@@ -34,6 +66,7 @@ class RAGService:
             temperature: LLM temperature
             top_k: Number of documents to retrieve
             timeout: LLM request timeout in seconds
+            system_prompt: Custom system prompt (see build_system_prompt)
         """
         self.embedding_model = embedding_model
         self.ollama_host = ollama_host
@@ -41,6 +74,7 @@ class RAGService:
         self.temperature = temperature
         self.top_k = top_k
         self.timeout = timeout
+        self.system_prompt = build_system_prompt(system_prompt)
         self.vector_store: Optional[FAISS] = None
         self.rag_chain = None
 
@@ -116,14 +150,8 @@ class RAGService:
             )
 
             # Create the prompt
-            system_prompt = (
-                "Use the provided context to answer the question. "
-                "If you don't know the answer, say you don't know. "
-                "Use a maximum of three sentences and keep the answer concise. "
-                "Context: {context}"
-            )
             prompt = ChatPromptTemplate.from_messages([
-                ("system", system_prompt),
+                ("system", self.system_prompt),
                 ("human", "{input}"),
             ])
 

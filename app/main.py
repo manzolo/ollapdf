@@ -149,7 +149,8 @@ def initialize_rag(model_name: str, temperature: float, top_k: int):
                 model_name=model_name,
                 temperature=temperature,
                 top_k=top_k,
-                timeout=config.llm_timeout
+                timeout=config.llm_timeout,
+                system_prompt=config.system_prompt
             )
             rag_chain = rag_service.initialize(st.session_state.documents)
             logger.info(f"RAG chain initialized successfully with model: {model_name}, temperature: {temperature}, top_k: {top_k}.")

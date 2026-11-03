@@ -72,6 +72,12 @@ DEFAULT_CHUNK_SIZE=1000
 DEFAULT_CHUNK_OVERLAP=200
 DEFAULT_TOP_K=4
 
+# Embeddings — use a multilingual model if questions and PDFs are in different languages
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
+# System prompt — empty uses the built-in one; {context} marks where the retrieved text goes
+SYSTEM_PROMPT=
+
 # OCR — optional, leave empty to disable
 OCR_API_URL=
 OCR_API_TOKEN=
