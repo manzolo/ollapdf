@@ -54,7 +54,8 @@ class RAGService:
         temperature: float = 0.1,
         top_k: int = 4,
         timeout: int = 300,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        max_response_tokens: int = 8192
     ):
         """
         Initialize RAG service.
@@ -67,6 +68,7 @@ class RAGService:
             top_k: Number of documents to retrieve
             timeout: LLM request timeout in seconds
             system_prompt: Custom system prompt (see build_system_prompt)
+            max_response_tokens: Cap on generated tokens, thinking included; 0 or less = no cap
         """
         self.embedding_model = embedding_model
         self.ollama_host = ollama_host
@@ -75,6 +77,8 @@ class RAGService:
         self.top_k = top_k
         self.timeout = timeout
         self.system_prompt = build_system_prompt(system_prompt)
+        # Ollama's "no limit" is -1: a model that loops would hold the GPU until LLM_TIMEOUT
+        self.num_predict = max_response_tokens if max_response_tokens > 0 else -1
         self.vector_store: Optional[FAISS] = None
         self.rag_chain = None
 
@@ -138,6 +142,7 @@ class RAGService:
         logger.info(f"  - Model: {self.model_name}")
         logger.info(f"  - Temperature: {self.temperature}")
         logger.info(f"  - Top-K retrieval: {self.top_k}")
+        logger.info(f"  - Max response tokens: {self.num_predict}")
 
         try:
             # Configure the LLM model
@@ -146,7 +151,7 @@ class RAGService:
                 model=self.model_name,
                 temperature=self.temperature,
                 timeout=self.timeout,
-                num_predict=-1,  # No limit on response length
+                num_predict=self.num_predict,
             )
 
             # Create the prompt

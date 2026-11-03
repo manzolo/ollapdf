@@ -48,3 +48,17 @@ class TestRAGServicePrompt:
     def test_service_custom_prompt(self):
         service = RAGService(system_prompt="Only facts. {context}")
         assert service.system_prompt == "Only facts. {context}"
+
+
+class TestRAGServiceResponseCap:
+    """RAGService caps the length of an answer (num_predict)."""
+
+    def test_default_cap(self):
+        assert RAGService().num_predict == 8192
+
+    def test_custom_cap(self):
+        assert RAGService(max_response_tokens=2048).num_predict == 2048
+
+    def test_zero_or_negative_means_no_cap(self):
+        assert RAGService(max_response_tokens=0).num_predict == -1
+        assert RAGService(max_response_tokens=-5).num_predict == -1

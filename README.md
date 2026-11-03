@@ -73,10 +73,14 @@ DEFAULT_CHUNK_OVERLAP=200
 DEFAULT_TOP_K=4
 
 # Embeddings — use a multilingual model if questions and PDFs are in different languages
+# (BAAI/bge-m3 worked best in our tests: Italian questions over English papers)
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 
 # System prompt — empty uses the built-in one; {context} marks where the retrieved text goes
 SYSTEM_PROMPT=
+
+# Cap on the tokens of one answer, thinking included (0 = no cap)
+MAX_RESPONSE_TOKENS=8192
 
 # OCR — optional, leave empty to disable
 OCR_API_URL=

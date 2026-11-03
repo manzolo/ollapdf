@@ -81,12 +81,13 @@ make test-integration-local
 | `DEFAULT_CHUNK_SIZE` | `1000` | |
 | `DEFAULT_CHUNK_OVERLAP` | `200` | |
 | `DEFAULT_TOP_K` | `4` | |
-| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | English-only: use a multilingual model when questions and PDFs differ in language |
+| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | English-only: use a multilingual model when questions and PDFs differ in language (`BAAI/bge-m3` measured best) |
 | `SYSTEM_PROMPT` | `` (empty) | Empty = `DEFAULT_SYSTEM_PROMPT` in `rag_service.py`. `{context}` is the only template variable (appended if missing, other braces escaped) |
 | `OCR_API_URL` | `` (empty) | Leave empty to disable OCR |
 | `OCR_API_TOKEN` | `` | Bearer token for dots.ocr |
 | `OCR_MIN_TEXT_LENGTH` | `50` | Pages below this char count trigger OCR |
 | `LLM_TIMEOUT` | `300` | Seconds |
+| `MAX_RESPONSE_TOKENS` | `8192` | `num_predict` of ChatOllama, thinking included; `0` or less = no cap (`-1`) |
 
 ## Important constraints
 

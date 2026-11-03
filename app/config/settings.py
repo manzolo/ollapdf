@@ -34,6 +34,7 @@ class AppConfig:
 
     # LLM settings
     llm_timeout: int
+    max_response_tokens: int
 
     # OCR settings
     ocr_api_url: str
@@ -76,6 +77,7 @@ def load_config() -> AppConfig:
 
         # LLM settings
         llm_timeout=int(os.getenv("LLM_TIMEOUT", "300")),
+        max_response_tokens=int(os.getenv("MAX_RESPONSE_TOKENS", "8192")),
 
         # OCR settings
         ocr_api_url=os.getenv("OCR_API_URL", ""),
